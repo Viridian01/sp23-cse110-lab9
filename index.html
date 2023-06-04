@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+  <script src="https://cdn.trackjs.com/agent/v3/latest/t.js"></script>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -85,9 +86,21 @@
       <button>Console Trace</button>
       <button>Trigger a Global Error</button>
     </section>
+    <img src="images/errors.png" style="width: 200%">
   </main>
 
   <script>
+    window.TrackJS && TrackJS.install({ 
+      token: "3a13482ef13a4657bf54b64ffec914ce"
+      // for more configuration options, see https://docs.trackjs.com
+    });
+    const numberExp = new RegExp(/^[0-9]*$/);
+    class InputError extends Error {
+      constructor(message) {
+        super(message);
+        this.name = "InputError";
+      }
+    }
     let form = document.querySelector('form');
     form.addEventListener('submit', e => {
       e.preventDefault();
@@ -95,13 +108,82 @@
       let firstNum = document.querySelector('#first-num').value;
       let secondNum = document.querySelector('#second-num').value;
       let operator = document.querySelector('#operator').value;
-      output.innerHTML = eval(`${firstNum} ${operator} ${secondNum}`);
+      try {
+        if (!numberExp.test(firstNum)) {
+          throw new InputError("First number contains letters!");
+        }
+        if (!numberExp.test(secondNum)) {
+          throw new InputError("Second number contains letters!");
+        }
+        output.innerHTML = eval(`${firstNum} ${operator} ${secondNum}`);
+      }
+      catch (error) {
+        console.error(error);
+        console.error("Failed to compute.");
+      }
+      finally {
+        console.log("Attempted to calculate.");
+      }
     });
-
+    TrackJS.track('Testing TrackJS!');
     let errorBtns = Array.from(document.querySelectorAll('#error-btns > button'));
 
     // Start your code here
-    // You may move this JS to another file if you wish
+    window.addEventListener('error', (event) => {
+      console.log("Error caught via event!");
+      console.error(event.message);
+    });
+
+    throw new Error("Test error.");
+
+    errorBtns[0].addEventListener('click', function() {
+      console.log("Hello from Console Log!");
+    });
+    errorBtns[1].addEventListener('click', function() {
+      console.error("Hello from Console Error!");
+    });
+    errorBtns[2].addEventListener('click', function() {
+      console.count();
+    });
+    errorBtns[3].addEventListener('click', function() {
+      console.warn("Hello from Console Warn!");
+    });
+    errorBtns[4].addEventListener('click', function() {
+      console.assert(false, "Hello from Assert! (It's always false!)");
+    });
+    errorBtns[5].addEventListener('click', function() {
+      console.clear();
+    });
+    errorBtns[6].addEventListener('click', (event) => {
+      console.dir(event);
+    });
+    errorBtns[7].addEventListener('click', (event) => {
+      console.dirxml(event.target);
+    });
+    errorBtns[8].addEventListener('click', function() {
+      console.group("Test Group");
+    });
+    errorBtns[9].addEventListener('click', function() {
+      console.groupEnd();
+    });
+    errorBtns[10].addEventListener('click', function() {
+      console.table(["What", "are", "you", "reading"]);
+    });
+    errorBtns[11].addEventListener('click', function(){
+      console.time("Timer");
+    });
+    errorBtns[12].addEventListener('click', function() {
+      console.timeEnd("Timer");
+    });
+    errorBtns[13].addEventListener('click', function() {
+      console.trace();
+    });
+    errorBtns[14].addEventListener('click', function() {
+      let errorRef = document.getElementById("non-existent-id");
+      errorRef.innerHTML = "Throw an error!";
+    });
+
+    const thing = fetch("non-existent-url");
   </script>
 </body>
 
